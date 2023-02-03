@@ -4,7 +4,7 @@
 
 /*
 Pins Arduino <=> SD Card module
-10 - CS / SS (chipSelectSdCard see below)
+4 - CS / SS (chipSelectSdCard see below)
 11 - MOSI
 12 - MISO
 13 - SCK / CLK
@@ -46,8 +46,9 @@ const int chipSelectSdCard = 4;
 
 int OrH = 2; //orientation switch Horizontal
 int OrV = 3; //orientation switch Vertical
+String FilePath;
 
-void setup()
+void setup()  
 {
   // Open serial communications and wait for port to open:
   Serial.begin(9600);
@@ -69,35 +70,20 @@ void setup()
 
   Serial.println("SD initialization done.");
 
-  /*
+  //const char Path = "";
+
     pinMode(OrH, INPUT_PULLUP);
-    pinMode(OrV, INPUT_PULLUP); 
-    File root = SD.open("");
+    pinMode(OrV, INPUT_PULLUP);
 
-  for (bool fori = true; fori==true;){
-    
-   
-    if(digitalRead(OrH)==LOW){
-      File root = SD.open("/hor/");
-       fori = false;
-       delay(100);
-    }
+    mode();
 
-   if(digitalRead(OrV)==LOW){      
-      File root = SD.open("/ver/");
-       fori = false;
-       delay(100);
-    }
-    delay(100);
-    Serial.println("arround");
-  }
+  // Loop over all files in the root folder
+  File root = SD.open(FilePath);
+
 
     pinMode(OrH, INPUT);
     pinMode(OrV, INPUT); 
-  */
 
-  // Loop over all files in the root folder
-  File root = SD.open("/hor/");
   Epd epd;
 
   while(true)
@@ -142,8 +128,28 @@ void setup()
     delay(120000);  // 2 minutes
   
   }
+
+  
+
+
+
 }
 
 void loop()
 {
 }
+
+void mode () {
+  while(true) {
+    if(digitalRead(OrH)==LOW){
+      FilePath = "/hor/";
+      return;
+    }
+
+   if(digitalRead(OrV)==LOW){      
+      FilePath = "/ver/";
+      return;
+    }
+    delay(100);
+    }
+  }
