@@ -68,34 +68,36 @@ void setup()
   }
 
   Serial.println("SD initialization done.");
-    
 
-    String FolderPath = String(""); //just to create it for the open function to not freak out
-
-  
-  for (bool fori = true; fori==true;){
-    
+  /*
     pinMode(OrH, INPUT_PULLUP);
     pinMode(OrV, INPUT_PULLUP); 
+    File root = SD.open("");
 
+  for (bool fori = true; fori==true;){
+    
+   
     if(digitalRead(OrH)==LOW){
-      String FolderPath = String("/hor/");
-      Serial.println(FolderPath);
+      File root = SD.open("/hor/");
        fori = false;
+       delay(100);
     }
 
    if(digitalRead(OrV)==LOW){      
-      String FolderPath = String("/ver/");
-      Serial.println(FolderPath);
+      File root = SD.open("/ver/");
        fori = false;
+       delay(100);
     }
     delay(100);
+    Serial.println("arround");
   }
 
-  
-  // Loop over all files in the root folder
-  File root = SD.open(FolderPath);
+    pinMode(OrH, INPUT);
+    pinMode(OrV, INPUT); 
+  */
 
+  // Loop over all files in the root folder
+  File root = SD.open("/hor/");
   Epd epd;
 
   while(true)
