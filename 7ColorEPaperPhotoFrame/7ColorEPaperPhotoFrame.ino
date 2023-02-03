@@ -42,12 +42,15 @@ Display
 - the byte containing the two pixels can be written to the display 'as is'
 */
 
-const int chipSelectSdCard = 10;
+const int chipSelectSdCard = 4;
+
+int OrH = 2; //orientation switch Horizontal
+int OrV = 3; //orientation switch Vertical
 
 void setup()
 {
   // Open serial communications and wait for port to open:
-  Serial.begin(115200);
+  Serial.begin(9600);
 
   // wait for Serial Monitor to connect. Needed for native USB port boards only:
   while (!Serial);
@@ -66,8 +69,32 @@ void setup()
 
   Serial.println("SD initialization done.");
     
+
+    String FolderPath = String(""); //just to create it for the open function to not freak out
+
+  
+  for (bool fori = true; fori==true;){
+    
+    pinMode(OrH, INPUT_PULLUP);
+    pinMode(OrV, INPUT_PULLUP); 
+
+    if(digitalRead(OrH)==LOW){
+      String FolderPath = String("/hor/");
+      Serial.println(FolderPath);
+       fori = false;
+    }
+
+   if(digitalRead(OrV)==LOW){      
+      String FolderPath = String("/ver/");
+      Serial.println(FolderPath);
+       fori = false;
+    }
+    delay(100);
+  }
+
+  
   // Loop over all files in the root folder
-  File root = SD.open("/");
+  File root = SD.open(FolderPath);
 
   Epd epd;
 
@@ -80,7 +107,8 @@ void setup()
       Serial.print("e-Paper init failed");
       return;
     }
-    
+
+      
     File file =  root.openNextFile();
 
     // no more files
@@ -109,7 +137,8 @@ void setup()
     file.close();
 
     Serial.println("start delay");
-    delay(300000);  // 5 minutes
+    delay(120000);  // 2 minutes
+  
   }
 }
 
