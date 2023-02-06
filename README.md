@@ -1,3 +1,5 @@
+This README is written by robertmoro. Please just ignore it and use his script, I´ll update the readme when I´m "finished" (it somehow works like intendet). If you nevertheless use the script, keep in mind that some pins may differenciate from the ones given in this README.md.
+
 # Seven color e-paper photo frame
 Battery operated photo frame using the [Advanced Color ePaper (ACeP™) display from Waveshare](https://www.waveshare.com/wiki/5.65inch_e-Paper_Module_(F)). The display has seven colors and measure 5.56 inch, 600 by 448 pixels. Overall dimensions: 125.4 x 99.5 x 9mm (WxHxD, depth includes header and display). Display usable area dimensions: 114.9 x 85.8mm (WxH). The images are preprocessed using [Floyd-Steinberg dithering](https://www.waveshare.com/wiki/E-Paper_Floyd-Steinberg) to reduce to 7 colors and still have a reasonable quality and stored on a SD-card. An Arduino is used to read from the SD-card and write to the display. [lenna.bmp](https://github.com/robertmoro/7ColorEPaperPhotoFrame/blob/main/lenna.bmp) is a ready to use example image.
 
