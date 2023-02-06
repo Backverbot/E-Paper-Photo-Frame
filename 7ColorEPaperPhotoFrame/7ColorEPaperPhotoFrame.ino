@@ -1,6 +1,7 @@
 #include "bmp.h"
 #include "epd5in65f.h"
 #include <SD.h>
+#include <LowPower.h>
 
 /*
 Pins Arduino <=> SD Card module
@@ -46,6 +47,9 @@ const int chipSelectSdCard = 4;
 
 int OrH = 2; //orientation switch Horizontal
 int OrV = 3; //orientation switch Vertical
+int rsp = A1; //pin used to reset the arduino
+bool Vert;
+bool Hori;
 String FilePath;
 
 void setup()  
@@ -70,19 +74,18 @@ void setup()
 
   Serial.println("SD initialization done.");
 
-  //const char Path = "";
-
     pinMode(OrH, INPUT_PULLUP);
     pinMode(OrV, INPUT_PULLUP);
 
     mode();
 
+    pinMode(OrH, INPUT);
+    pinMode(OrV, INPUT); 
+
   // Loop over all files in the root folder
   File root = SD.open(FilePath);
 
 
-    pinMode(OrH, INPUT);
-    pinMode(OrV, INPUT); 
 
   Epd epd;
 
@@ -124,9 +127,17 @@ void setup()
 
     file.close();
 
-    Serial.println("start delay");
-    delay(120000);  // 2 minutes
+    Serial.println("power Down (if it would work...)");
+    delay(180000);  // 3 minutes |HERE LOWPOWER|
+
+    pinMode(OrH, INPUT_PULLUP);
+    pinMode(OrV, INPUT_PULLUP);
+
+    checkmode ();
   
+    pinMode(OrH, INPUT);
+    pinMode(OrV, INPUT);
+
   }
 
   
@@ -143,11 +154,34 @@ void mode () {
   while(true) {
     if(digitalRead(OrH)==LOW){
       FilePath = "/hor/";
+      Hori = true;
       return;
     }
 
    if(digitalRead(OrV)==LOW){      
       FilePath = "/ver/";
+      Vert = true;
+      return;
+    }
+    delay(100);
+    }
+  }
+
+  void checkmode () {
+  while(true) {
+    if(digitalRead(OrH)==LOW){
+      if (Vert==true){
+        pinMode(rsp, OUTPUT);
+        digitalWrite(rsp, HIGH);
+      }
+      return;
+    }
+
+   if(digitalRead(OrV)==LOW){      
+      if (Hori==true){
+        pinMode(rsp, OUTPUT);
+        digitalWrite(rsp, HIGH);
+      }
       return;
     }
     delay(100);
