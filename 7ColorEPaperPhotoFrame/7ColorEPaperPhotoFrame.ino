@@ -45,9 +45,10 @@ Display
 
 const int chipSelectSdCard = 4;
 
-int OrH = 2; //orientation switch Horizontal
-int OrV = 3; //orientation switch Vertical
+int OrH = A2; //orientation switch Horizontal
+int OrV = A3; //orientation switch Vertical
 int rsp = A1; //pin used to reset the arduino
+int SDPWR = 2;  //Pin to power the SD Card reader
 bool Vert;
 bool Hori;
 String FilePath;
@@ -57,9 +58,12 @@ void setup()
   // Open serial communications and wait for port to open:
   Serial.begin(9600);
 
+  pinMode(SDPWR, OUTPUT);
+
   // wait for Serial Monitor to connect. Needed for native USB port boards only:
   while (!Serial);
 
+  digitalWrite(SDPWR, HIGH);
   Serial.print("Initializing SD card...");
 
   if (!SD.begin(chipSelectSdCard))
@@ -126,7 +130,7 @@ void setup()
     epd.Sleep();
 
     file.close();
-
+    digitalWrite(SDPWR, LOW);
     Serial.println("power Down (if it would work...)");
     delay(180000);  // 3 minutes |HERE LOWPOWER|
 
@@ -137,6 +141,8 @@ void setup()
   
     pinMode(OrH, INPUT);
     pinMode(OrV, INPUT);
+    digitalWrite(SDPWR, HIGH);
+    delay(15);
 
   }
 
