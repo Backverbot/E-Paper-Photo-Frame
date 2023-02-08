@@ -134,11 +134,7 @@ void setup()
     //digitalWrite(SDPWR, LOW);
     Serial.println("power Down (if it would work...)");
     delay(1000);  //delays because the low power library becomes pretty buggy (in my case) without them although it should not
-    //sleepForduration(15);
-    for (int i=0; i< 15; i++) {
-        LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
-        delay(2);
-      }
+    sleepForduration(15);
     //delay(180000);  // 3 minutes
 
     pinMode(OrH, INPUT_PULLUP);
@@ -214,10 +210,9 @@ void mode () {
     }
     }
 
-    void sleepForduration(int cycles) {
-      //int cycles = duration/8;
+    void sleepForduration(int duration) {
+      int cycles = duration/8;
       for (int i=0; i< cycles; i++) {
         LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
-        delay(2);
       }
     }
