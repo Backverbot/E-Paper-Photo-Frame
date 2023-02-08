@@ -45,8 +45,8 @@ Display
 
 const int chipSelectSdCard = 4;
 
-int OrH = A2; //orientation switch Horizontal
-int OrV = A3; //orientation switch Vertical
+int OrH = A3; //orientation switch Horizontal
+int OrV = A2; //orientation switch Vertical
 int rsp = A1; //pin used to reset the arduino
 int SDPWR = 2;  //Pin to power the SD Card reader
 bool Vert;
@@ -64,7 +64,7 @@ void setup()
   while (!Serial);
 
   digitalWrite(SDPWR, HIGH);
-  Serial.print("Initializing SD card...");
+  //Serial.print("Initializing SD card...");
 
   if (!SD.begin(chipSelectSdCard))
   {
@@ -76,7 +76,7 @@ void setup()
     while (true);
   }
 
-  Serial.println("SD initialization done.");
+  //Serial.println("SD initialization done.");
 
     pinMode(OrH, INPUT_PULLUP);
     pinMode(OrV, INPUT_PULLUP);
@@ -130,9 +130,16 @@ void setup()
     epd.Sleep();
 
     file.close();
-    digitalWrite(SDPWR, LOW);
+    delay(1000);
+    //digitalWrite(SDPWR, LOW);
     Serial.println("power Down (if it would work...)");
-    delay(180000);  // 3 minutes |HERE LOWPOWER|
+    delay(1000);  //delays because the low power library becomes pretty buggy (in my case) without them although it should not
+    //sleepForduration(15);
+    for (int i=0; i< 15; i++) {
+        LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
+        delay(2);
+      }
+    //delay(180000);  // 3 minutes
 
     pinMode(OrH, INPUT_PULLUP);
     pinMode(OrV, INPUT_PULLUP);
@@ -142,7 +149,7 @@ void setup()
     pinMode(OrH, INPUT);
     pinMode(OrV, INPUT);
     digitalWrite(SDPWR, HIGH);
-    delay(15);
+    delay(3000);
 
   }
 
@@ -157,6 +164,7 @@ void loop()
 }
 
 void mode () {
+  int i = 0;
   while(true) {
     if(digitalRead(OrH)==LOW){
       FilePath = "/hor/";
@@ -170,10 +178,16 @@ void mode () {
       return;
     }
     delay(100);
+      i++;
+    if(i>=100){
+      FilePath = "/err/";
+      return;
+      }
     }
   }
 
   void checkmode () {
+    int i = 0;
   while(true) {
     if(digitalRead(OrH)==LOW){
       if (Vert==true){
@@ -191,5 +205,19 @@ void mode () {
       return;
     }
     delay(100);
+    i++;
+    if(i>=100){
+      pinMode(rsp, OUTPUT);
+      digitalWrite(rsp, HIGH);
+      }
+
     }
-  }
+    }
+
+    void sleepForduration(int cycles) {
+      //int cycles = duration/8;
+      for (int i=0; i< cycles; i++) {
+        LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
+        delay(2);
+      }
+    }
