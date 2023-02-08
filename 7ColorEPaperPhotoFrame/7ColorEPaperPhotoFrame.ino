@@ -52,6 +52,9 @@ int SDPWR = 2;  //Pin to power the SD Card reader
 bool Vert;
 bool Hori;
 String FilePath;
+const char* fileName = "currentFile.txt";
+char currentFile[100];
+
 
 void setup()  
 {
@@ -86,15 +89,38 @@ void setup()
     pinMode(OrH, INPUT);
     pinMode(OrV, INPUT); 
 
+    getNextFileName();
+    strcpy(path, FilePath);
+    strcat(path, fileName);
+    //currentFile = SD.open(path);
+
   // Loop over all files in the root folder
-  File root = SD.open(FilePath);
-
-
+  //File root = SD.open(FilePath);
+    File file = SD.open(FilePath);
+    if(file) {
+    int i=0;
+    while(file.available()) {
+      currentFile[i++] = file.read();
+    }
+    file.close();      
+    }
+    else {
+    getNextFileName();
+    }
 
   Epd epd;
 
   while(true)
   {
+    while(file.available()) {
+      currentFile[i++] = file.read();
+    }
+    file.close();      
+    }
+    else {
+    getNextFileName();
+    }
+
     // Init also performs a reset, which will gets the display out of sleep state
     Serial.println("Init display");
     if (epd.Init() != 0)
@@ -104,13 +130,13 @@ void setup()
     }
 
       
-    File file =  root.openNextFile();
+    File file =  file.openNextFile();
 
     // no more files
     // return to the first file in the directory
     if (!file)
     {
-      root.rewindDirectory();
+      file.rewindDirectory();
       continue;
     }
 
@@ -120,6 +146,7 @@ void setup()
       file.close();
       continue;
     }
+    currentFile.close();
 
     Serial.println("e-Paper Clear");
     epd.Clear(EPD_5IN65F_WHITE);
@@ -130,8 +157,17 @@ void setup()
     epd.Sleep();
 
     file.close();
+
+    saveCurrentFile();
+
+        getNextFileName();
+
+    strcpy(path, FilePath);
+    strcat(path, fileName);
+    currentFile=SD.open(path);
+
     delay(1000);
-    //digitalWrite(SDPWR, LOW);
+    digitalWrite(SDPWR, LOW);
     Serial.println("power Down (if it would work...)");
     delay(1000);  //delays because the low power library becomes pretty buggy (in my case) without them although it should not
     sleepForduration(15);
@@ -214,5 +250,41 @@ void mode () {
       int cycles = duration/8;
       for (int i=0; i< cycles; i++) {
         LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
+        delay(2);
       }
     }
+
+
+  void saveCurrentFile() {
+    File file = SD.open(fileName, FILE_WRITE);
+    if (file) {
+      file.print(currentFile);
+      file.close();
+    }
+  }
+
+  void getNextFileName()  {
+    File file = SD.open("currentFile.txt");
+    if(!file)
+ {
+   strcpy(fileName, "/");
+   return;
+ }
+    int i=0;
+    while (file.available())  {
+      fileName[i++]=file.read();
+    }
+    fileName[i]='\0';
+    file.close();
+    int len = strlen(fileName);
+    if (fileName[len - 1] == 'g' && fileName[len -2] == 'j' && fileName[len-3] == 'p') {
+      int num =atoi (&fileName[len - 7]);
+      num++;
+      sprintf(fileName, "image%d.bmp", num);
+    }
+
+    file = SD.open("currentFile.txt", FILE_WRITE);
+    file.println(fileName);
+    file.close();
+
+   }
