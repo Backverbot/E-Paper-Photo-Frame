@@ -52,9 +52,8 @@ int SDPWR = 2;  //Pin to power the SD Card reader
 bool Vert;
 bool Hori;
 String FilePath;
-const char* fileName = "currentFile.txt";
-char currentFile[100];
 
+  //START
 
 void setup()  
 {
@@ -84,43 +83,20 @@ void setup()
     pinMode(OrH, INPUT_PULLUP);
     pinMode(OrV, INPUT_PULLUP);
 
-    mode();
+    mode(); 
 
     pinMode(OrH, INPUT);
     pinMode(OrV, INPUT); 
 
-    getNextFileName();
-    strcpy(path, FilePath);
-    strcat(path, fileName);
-    //currentFile = SD.open(path);
-
   // Loop over all files in the root folder
-  //File root = SD.open(FilePath);
-    File file = SD.open(FilePath);
-    if(file) {
-    int i=0;
-    while(file.available()) {
-      currentFile[i++] = file.read();
-    }
-    file.close();      
-    }
-    else {
-    getNextFileName();
-    }
+  File root = SD.open(FilePath);
 
   Epd epd;
 
+  //LOOP
+
   while(true)
   {
-    while(file.available()) {
-      currentFile[i++] = file.read();
-    }
-    file.close();      
-    }
-    else {
-    getNextFileName();
-    }
-
     // Init also performs a reset, which will gets the display out of sleep state
     Serial.println("Init display");
     if (epd.Init() != 0)
@@ -130,13 +106,13 @@ void setup()
     }
 
       
-    File file =  file.openNextFile();
+    File file =  root.openNextFile();
 
     // no more files
     // return to the first file in the directory
     if (!file)
     {
-      file.rewindDirectory();
+      root.rewindDirectory();
       continue;
     }
 
@@ -146,33 +122,25 @@ void setup()
       file.close();
       continue;
     }
-    currentFile.close();
 
-    Serial.println("e-Paper Clear");
+    //Serial.println("e-Paper Clear");
     epd.Clear(EPD_5IN65F_WHITE);
+    /*
     Serial.print("Show: ");
     Serial.println(file.name());
+    */
     epd.EPD_5IN65F_Display(&Bmp(&file));
-    Serial.println("Sleep");
+    //Serial.println("Sleep");
     epd.Sleep();
 
     file.close();
 
-    saveCurrentFile();
-
-        getNextFileName();
-
-    strcpy(path, FilePath);
-    strcat(path, fileName);
-    currentFile=SD.open(path);
-
     delay(1000);
     digitalWrite(SDPWR, LOW);
-    Serial.println("power Down (if it would work...)");
+    //Serial.println("power Down (if it would work...)");
     delay(1000);  //delays because the low power library becomes pretty buggy (in my case) without them although it should not
-    sleepForduration(15);
-    //delay(180000);  // 3 minutes
-
+    sleepForduration(64); //duration in s, due it uses the SLEEP_8S command it gets roundet to the nearest multiple of 8
+    delay(500);
     pinMode(OrH, INPUT_PULLUP);
     pinMode(OrV, INPUT_PULLUP);
 
@@ -180,22 +148,24 @@ void setup()
   
     pinMode(OrH, INPUT);
     pinMode(OrV, INPUT);
+    /*
     digitalWrite(SDPWR, HIGH);
     delay(3000);
+    */
 
   }
 
   
-
+  //SUBPROGRAMMS
 
 
 }
 
-void loop()
+void loop() //UNUSED
 {
 }
 
-void mode () {
+void mode() {
   int i = 0;
   while(true) {
     if(digitalRead(OrH)==LOW){
@@ -255,36 +225,5 @@ void mode () {
     }
 
 
-  void saveCurrentFile() {
-    File file = SD.open(fileName, FILE_WRITE);
-    if (file) {
-      file.print(currentFile);
-      file.close();
-    }
-  }
 
-  void getNextFileName()  {
-    File file = SD.open("currentFile.txt");
-    if(!file)
- {
-   strcpy(fileName, "/");
-   return;
- }
-    int i=0;
-    while (file.available())  {
-      fileName[i++]=file.read();
-    }
-    fileName[i]='\0';
-    file.close();
-    int len = strlen(fileName);
-    if (fileName[len - 1] == 'g' && fileName[len -2] == 'j' && fileName[len-3] == 'p') {
-      int num =atoi (&fileName[len - 7]);
-      num++;
-      sprintf(fileName, "image%d.bmp", num);
-    }
-
-    file = SD.open("currentFile.txt", FILE_WRITE);
-    file.println(fileName);
-    file.close();
-
-   }
+  
